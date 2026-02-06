@@ -134,8 +134,10 @@ component CategoryButton inherits Rectangle {
 
 export component MainWindow inherits Window {
     title: "ExoSuite";
-    width: 1100px;
-    height: 750px;
+    preferred-width: 1100px;
+    preferred-height: 750px;
+    min-width: 800px;
+    min-height: 500px;
     background: Palette.current.bg-solid;
     VerticalBox {
         padding: 0px;
@@ -316,11 +318,11 @@ export component MainWindow inherits Window {
                         VerticalBox {
                             alignment: center;
                             spacing: 8px;
-                            Text {
-                                text: "⚙";
-                                font-size: 48px;
-                                color: Palette.current.text-tertiary;
-                                horizontal-alignment: center;
+                            Image {
+                                source: @image-url("../resources/icons/settings.svg");
+                                width: 64px;
+                                height: 64px;
+                                colorize: Palette.current.text-tertiary;
                             }
 
                             Text {
