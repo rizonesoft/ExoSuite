@@ -82,27 +82,27 @@ global Icons {
     out property <string> hardware: "M4 4h16v16H4V4zm4-2v2m8-2v2M4 12h-2m2-4H2m2 8H2m20-4h-2m2-4h-2m2 8h-2M8 20v2m8-2v2";
 }
 
-// Icon Button Component
-component IconButton inherits Rectangle {
-    in property <string> icon-text: "";
+// Toolbar Icon Button Component (uses SVG images)
+component ToolbarButton inherits Rectangle {
+    in property <image> icon;
     in property <string> tooltip: "";
+    in property <bool> active: false;
     callback clicked();
     width: 36px;
     height: 36px;
     border-radius: 4px;
-    background: touch.has-hover ? Palette.current.bg-card-hover : transparent;
+    background: active ? Palette.current.accent : (touch.has-hover ? Palette.current.bg-card-hover : transparent);
     touch := TouchArea {
         clicked => {
             root.clicked();
         }
     }
 
-    Text {
-        text: icon-text;
-        font-size: 14px;
-        color: Palette.current.text-secondary;
-        horizontal-alignment: center;
-        vertical-alignment: center;
+    Image {
+        source: icon;
+        width: 18px;
+        height: 18px;
+        colorize: active ? #ffffff : Palette.current.text-secondary;
     }
 }
 
@@ -134,7 +134,7 @@ component CategoryButton inherits Rectangle {
 
 export component MainWindow inherits Window {
     title: "ExoSuite";
-    icon: @image-url("../resources/ExoSuite.ico");
+    icon: @image-url("../resources/ExoSuite_32.png");
     preferred-width: 1100px;
     preferred-height: 750px;
     min-width: 800px;
@@ -166,30 +166,51 @@ export component MainWindow inherits Window {
                     horizontal-stretch: 1;
                 }
                 
-                // Toolbar Buttons
-                IconButton {
-                    icon-text: "⟳";
+                // Toolbar Buttons - Refresh
+                ToolbarButton {
+                    icon: @image-url("../resources/icons/refresh.svg");
                     tooltip: "Refresh";
                 }
 
-                IconButton {
-                    icon-text: "▤";
-                    tooltip: "Grid View";
-                }
-
-                IconButton {
-                    icon-text: "☰";
-                    tooltip: "List View";
-                }
-
+                // Separator
                 Rectangle {
                     width: 1px;
                     height: 24px;
                     background: Palette.current.border-subtle;
                 }
 
-                IconButton {
-                    icon-text: "⚙";
+                // View Mode Buttons
+                ToolbarButton {
+                    icon: @image-url("../resources/icons/view-large-icons.svg");
+                    tooltip: "Large Icons";
+                    active: true;
+                }
+
+                ToolbarButton {
+                    icon: @image-url("../resources/icons/view-small-icons.svg");
+                    tooltip: "Small Icons";
+                }
+
+                ToolbarButton {
+                    icon: @image-url("../resources/icons/view-list.svg");
+                    tooltip: "List View";
+                }
+
+                ToolbarButton {
+                    icon: @image-url("../resources/icons/view-details.svg");
+                    tooltip: "Details View";
+                }
+
+                // Separator
+                Rectangle {
+                    width: 1px;
+                    height: 24px;
+                    background: Palette.current.border-subtle;
+                }
+
+                // Settings
+                ToolbarButton {
+                    icon: @image-url("../resources/icons/settings.svg");
                     tooltip: "Settings";
                 }
             }

@@ -26,7 +26,7 @@ This document outlines the complete development roadmap from initial structure t
 > **This is the first thing to implement** — Get a working window on screen before anything else.
 
 ### 0.0.1: Development Environment
-- [ ] Install Slint VS Code extension for live preview (manual: `Slint.slint`)
+- [x] Install Slint VS Code extension for live preview (manual: `Slint.slint`)
 - [ ] Verify Rust toolchain: `rustc --version` (1.70+)
 - [ ] Verify Cargo: `cargo --version`
 

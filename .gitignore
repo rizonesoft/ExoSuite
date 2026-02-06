@@ -1,16 +1,18 @@
-# Rust
+# Rust build outputs
 /target/
-Cargo.lock
 
-# Build
-/build/
-/bin/
-/obj/
+# ExoKit toolchain (downloaded via bootstrap)
+/exokit/rust/
+/exokit/llvm-mingw/
+/exokit/cmake/
+/exokit/ninja/
 
 # IDE
 .vs/
 *.user
 .idea/
+*.suo
+*.ntvs_analysis.dat
 
 # OS
 Thumbs.db

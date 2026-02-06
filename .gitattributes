@@ -1,0 +1,5 @@
+# Git LFS tracking (currently unused - tools downloaded via bootstrap)
+# Keeping this for future binary assets if needed
+*.exe filter=lfs diff=lfs merge=lfs -text
+*.dll filter=lfs diff=lfs merge=lfs -text
+Bin/** filter=lfs diff=lfs merge=lfs -text

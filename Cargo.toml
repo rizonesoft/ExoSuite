@@ -1,34 +1,17 @@
-[package]
-name = "exosuite"
+# ExoSuite Workspace
+# This is the root workspace manifest for the ExoSuite monorepo.
+
+[workspace]
+members = ["shell"]
+resolver = "2"
+
+[workspace.package]
 version = "0.1.0"
 edition = "2021"
 authors = ["Rizonesoft (Pty) Ltd"]
-description = "A modern Control Panel replacement for Windows 10/11"
 license = "Proprietary"
-
-[dependencies]
-slint = { version = "1.9", features = ["unstable-winit-030"] }
-windows = { version = "0.58", features = [
-    "Win32_Foundation",
-    "Win32_System_LibraryLoader",
-    "Win32_UI_Shell",
-    "Win32_UI_WindowsAndMessaging",
-] }
-
-[build-dependencies]
-slint-build = "1.9"
-
-[target.'cfg(windows)'.build-dependencies]
-winresource = "0.1"
-
-[[bin]]
-name = "ExoSuite"
-path = "src/main.rs"
 
 [profile.release]
 opt-level = 3
 lto = true
 strip = true
-
-[package.metadata.windows]
-subsystem = "windows"
