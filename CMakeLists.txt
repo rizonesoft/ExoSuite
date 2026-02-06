@@ -97,12 +97,91 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(EXOSUITE_EXTENSIONS_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/extensions)
 
 # ==============================================================================
-# C++/WinRT Configuration (for WinUI3)
+# C++/WinRT and Windows App SDK Configuration (WinUI3)
 # ==============================================================================
 
-# TODO: Configure C++/WinRT and Windows App SDK when implementing UI
-# find_package(Microsoft.Windows.CppWinRT CONFIG REQUIRED)
-# find_package(Microsoft.WindowsAppSDK CONFIG REQUIRED)
+# NuGet package versions
+set(CPPWINRT_VERSION "2.0.240405.15" CACHE STRING "C++/WinRT version")
+set(WINDOWSAPPSDK_VERSION "1.6.241114003" CACHE STRING "Windows App SDK version")
+
+# NuGet packages directory
+set(NUGET_PACKAGES_DIR "${CMAKE_BINARY_DIR}/packages")
+
+# Option to enable WinUI3 (requires NuGet packages to be restored)
+option(EXOSUITE_ENABLE_WINUI3 "Enable WinUI3 UI framework" OFF)
+
+if(EXOSUITE_ENABLE_WINUI3)
+    # C++/WinRT package paths
+    set(CPPWINRT_ROOT "${NUGET_PACKAGES_DIR}/Microsoft.Windows.CppWinRT.${CPPWINRT_VERSION}")
+    set(WINDOWSAPPSDK_ROOT "${NUGET_PACKAGES_DIR}/Microsoft.WindowsAppSDK.${WINDOWSAPPSDK_VERSION}")
+    
+    # Verify packages exist
+    if(NOT EXISTS "${CPPWINRT_ROOT}")
+        message(WARNING "C++/WinRT package not found. Run 'nuget restore' or disable EXOSUITE_ENABLE_WINUI3")
+    endif()
+    
+    if(NOT EXISTS "${WINDOWSAPPSDK_ROOT}")
+        message(WARNING "Windows App SDK package not found. Run 'nuget restore' or disable EXOSUITE_ENABLE_WINUI3")
+    endif()
+    
+    # C++/WinRT compiler settings
+    add_compile_definitions(
+        WINRT_LEAN_AND_MEAN
+        _SILENCE_CLANG_COROUTINE_MESSAGE
+    )
+    
+    # Include paths for Windows App SDK
+    # These will be populated when packages are restored
+    set(WINDOWSAPPSDK_INCLUDE_DIRS
+        "${WINDOWSAPPSDK_ROOT}/include"
+    )
+    
+    set(WINDOWSAPPSDK_LIB_DIRS
+        "${WINDOWSAPPSDK_ROOT}/lib/win10-x64"
+    )
+    
+    message(STATUS "WinUI3 support: ENABLED")
+    message(STATUS "  C++/WinRT version: ${CPPWINRT_VERSION}")
+    message(STATUS "  Windows App SDK version: ${WINDOWSAPPSDK_VERSION}")
+else()
+    message(STATUS "WinUI3 support: DISABLED (enable with -DEXOSUITE_ENABLE_WINUI3=ON)")
+endif()
+
+# ==============================================================================
+# Helper function for WinUI3 executables
+# ==============================================================================
+
+function(add_winui3_executable TARGET_NAME)
+    if(NOT EXOSUITE_ENABLE_WINUI3)
+        message(FATAL_ERROR "WinUI3 is not enabled. Set EXOSUITE_ENABLE_WINUI3=ON")
+    endif()
+    
+    # Create Windows GUI executable
+    add_executable(${TARGET_NAME} WIN32 ${ARGN})
+    
+    # Add Windows App SDK include directories
+    target_include_directories(${TARGET_NAME} PRIVATE ${WINDOWSAPPSDK_INCLUDE_DIRS})
+    
+    # Link Windows App SDK libraries
+    target_link_directories(${TARGET_NAME} PRIVATE ${WINDOWSAPPSDK_LIB_DIRS})
+    
+    # Common Windows libraries
+    target_link_libraries(${TARGET_NAME} PRIVATE
+        WindowsApp
+        user32
+        gdi32
+        shell32
+        ole32
+        oleaut32
+        advapi32
+    )
+    
+    # Set Windows App SDK manifest
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        WIN32_EXECUTABLE TRUE
+        VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION "10.0.17763.0"
+    )
+endfunction()
 
 # ==============================================================================
 # Source Files
