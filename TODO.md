@@ -24,9 +24,9 @@ This document outlines the complete development roadmap from initial structure t
   - [x] Set platform to x64 in all projects
   - [x] Update CMake to enforce Windows 10+ requirement
   - [x] Add platform validation on startup (check OS version, architecture)
-- [ ] Create build scripts (build.bat, build.ps1)
-- [ ] Configure build configurations (Debug, Release)
-- [ ] Set up single executable configuration
+- [x] Create build scripts (build.bat, build.ps1)
+- [x] Configure build configurations (Debug, Release)
+- [x] Set up single executable configuration
 - [ ] Configure extension projects to output to `system/` folder
 - [ ] Set up CMake targets for extension compilation
 - [ ] Create solution structure for main app + extensions

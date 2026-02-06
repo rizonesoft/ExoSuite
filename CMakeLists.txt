@@ -200,10 +200,52 @@ endfunction()
 # Main application source directory
 set(EXOSUITE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-# Placeholder for main executable (uncomment when source files exist)
-# add_executable(ExoSuite WIN32
-#     ${EXOSUITE_SRC_DIR}/main.cpp
-# )
+# Collect source files
+set(EXOSUITE_SOURCES
+    ${EXOSUITE_SRC_DIR}/main.cpp
+    ${EXOSUITE_SRC_DIR}/Core/Platform.cpp
+)
+
+set(EXOSUITE_HEADERS
+    ${EXOSUITE_SRC_DIR}/Core/Platform.h
+)
+
+# ==============================================================================
+# Main Executable
+# ==============================================================================
+
+add_executable(ExoSuite WIN32
+    ${EXOSUITE_SOURCES}
+    ${EXOSUITE_HEADERS}
+)
+
+# Include directories
+target_include_directories(ExoSuite PRIVATE ${EXOSUITE_SRC_DIR})
+
+# Link Windows libraries
+target_link_libraries(ExoSuite PRIVATE
+    user32
+    gdi32
+    shell32
+    ole32
+    oleaut32
+    advapi32
+    ntdll
+)
+
+# Single executable configuration - static runtime for standalone deployment
+if(MSVC)
+    # Use static runtime library for Release (no VCRUNTIME dependency)
+    set_property(TARGET ExoSuite PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
+# Set executable properties
+set_target_properties(ExoSuite PROPERTIES
+    OUTPUT_NAME "ExoSuite"
+    WIN32_EXECUTABLE TRUE
+    VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION "10.0.17763.0"
+)
 
 # ==============================================================================
 # Installation Configuration
