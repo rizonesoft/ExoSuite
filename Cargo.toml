@@ -7,7 +7,7 @@ description = "A modern Control Panel replacement for Windows 10/11"
 license = "Proprietary"
 
 [dependencies]
-slint = "1.9"
+slint = { version = "1.9", features = ["unstable-winit-030"] }
 windows = { version = "0.58", features = [
     "Win32_Foundation",
     "Win32_System_LibraryLoader",
@@ -17,6 +17,8 @@ windows = { version = "0.58", features = [
 
 [build-dependencies]
 slint-build = "1.9"
+
+[target.'cfg(windows)'.build-dependencies]
 winresource = "0.1"
 
 [[bin]]
