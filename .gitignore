@@ -1,38 +1,17 @@
-# Build directories
-build/
-out/
-cmake-build-*/
+# Rust
+/target/
+Cargo.lock
+
+# Build
+/build/
+/bin/
+/obj/
+
+# IDE
 .vs/
-
-# CMake generated files
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-Makefile
-*.cmake
-
-# Compiled files
-*.obj
-*.o
-*.exe
-*.dll
-*.lib
-*.so
-*.dylib
-*.pdb
-*.ilk
-*.exp
-
-# IDE files
-*.suo
 *.user
-*.sln.docstates
 .idea/
-*.code-workspace
 
-# OS files
+# OS
 Thumbs.db
 .DS_Store
-
-# Logs
-*.log

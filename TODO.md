@@ -2,22 +2,22 @@
 
 This document outlines the complete development roadmap from initial structure to production-ready release.
 
-**Tech Stack**: C++23, **Slint** UI Framework (No .NET Framework Required)
+**Tech Stack**: **Rust**, **Slint** UI Framework (No .NET Framework Required)
 
 ---
 
-## Why Slint?
+## Why Rust + Slint?
 
-**Slint** is a modern declarative UI toolkit that compiles `.slint` UI definitions directly into native C++ code.
+**Slint** is a modern declarative UI toolkit natively written in Rust.
 
 | Feature | Benefit |
 |---------|--------|
-| **Declarative UI** | Intuitive `.slint` file format - easy to read and design |
-| **Live Preview** | VS Code extension for real-time UI preview without recompiling |
-| **Dark/Light Mode** | Built-in system theme detection and switching |
-| **Tiny Footprint** | Extremely lightweight, ideal for utility tools |
-| **C++ Integration** | Compiles to native C++ code with zero runtime overhead |
-| **Modern Design** | Fluent-style widgets that look native on Windows |
+| **Simple Build** | Just `cargo build` — no CMake, no MSVC setup |
+| **Declarative UI** | Intuitive `.slint` file format |
+| **Live Preview** | VS Code extension for real-time UI preview |
+| **Dark/Light Mode** | Built-in system theme detection |
+| **Safe Win32** | `windows` crate with Rust safety guarantees |
+| **Fast Iteration** | `cargo run` to test immediately |
 
 ---
 
@@ -26,27 +26,28 @@ This document outlines the complete development roadmap from initial structure t
 > **This is the first thing to implement** — Get a working window on screen before anything else.
 
 ### 0.0.1: Development Environment
-- [ ] Install Slint VS Code extension for live preview
-- [ ] Verify CMake is available (version 3.21+)
-- [ ] Verify C++23 compiler available (MSVC 14.40+)
+- [ ] Install Slint VS Code extension for live preview (manual: `Slint.slint`)
+- [ ] Verify Rust toolchain: `rustc --version` (1.70+)
+- [ ] Verify Cargo: `cargo --version`
 
-### 0.0.2: Slint Project Setup
-- [ ] Create `CMakeLists.txt` with Slint FetchContent
+### 0.0.2: Rust Project Setup
+- [ ] Create `Cargo.toml` with Slint and windows crate
 - [ ] Create project directory structure:
   ```
   ExoSuite/
-  ├── src/main.cpp
+  ├── src/main.rs
   ├── ui/main.slint
-  └── CMakeLists.txt
+  ├── build.rs
+  └── Cargo.toml
   ```
-- [ ] Create minimal `src/main.cpp` (Slint app entry point)
+- [ ] Create minimal `src/main.rs` (Slint app entry point)
 - [ ] Create minimal `ui/main.slint` (empty window)
 
 ### 0.0.3: Test Compile & Run
-- [ ] Configure CMake: `cmake -B build`
-- [ ] Build: `cmake --build build --config Release`
-- [ ] Run executable and verify window appears
-- [ ] Test Slint Live Preview in VS Code
+- [ ] Build: `cargo build --release`
+- [ ] Run: `cargo run --release`
+- [ ] Verify window appears
+- [ ] Test Slint Live Preview in VS Code (optional)
 
 ### 0.0.4: Basic UI Shell Layout
 - [ ] Add NavigationView/sidebar to `main.slint`

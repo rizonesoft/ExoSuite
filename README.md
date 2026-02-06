@@ -2,7 +2,7 @@
 
 **A modern Control Panel replacement for Windows 10/11**
 
-ExoSuite is a native Windows application that provides a unified interface for accessing system Control Panel applets (.cpl files) and integrated utility extensions. Built with modern C++23 and **Slint**, it delivers a fast, visually polished experience without requiring .NET Framework.
+ExoSuite is a native Windows application that provides a unified interface for accessing system Control Panel applets (.cpl files) and integrated utility extensions. Built with **Rust** and **Slint**, it delivers a fast, visually polished experience.
 
 ## Features
 
@@ -10,24 +10,26 @@ ExoSuite is a native Windows application that provides a unified interface for a
 - 🧩 **Extension System** — Modular utilities that run standalone or integrated
 - 🔍 **Quick Search** — Find settings instantly with fuzzy search
 - 🎨 **Modern UI** — Slint declarative UI with light/dark themes
-- ⚡ **Native Performance** — Pure C++23, no managed runtime overhead
+- ⚡ **Native Performance** — Pure Rust, no runtime overhead
 - 🛡️ **UAC Aware** — Shield overlays for admin-required applets
 
 ## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
-| Language | C++23 |
+| Language | Rust |
 | UI Framework | [Slint](https://slint.dev) |
-| Build System | CMake (FetchContent) |
+| Win32 API | [windows](https://crates.io/crates/windows) crate |
+| Build System | Cargo |
 
-### Why Slint?
+### Why Rust + Slint?
 
+- **Simple Build** — `cargo build` (no CMake, no MSVC setup)
 - **Declarative UI** — Intuitive `.slint` file format
 - **Live Preview** — VS Code extension for real-time UI preview
 - **Dark/Light Mode** — Built-in system theme detection
-- **Tiny Footprint** — Lightweight, ideal for utility tools
-- **Native C++** — Compiles to native code with zero runtime overhead
+- **Safe Win32** — Windows crate with Rust's safety guarantees
+- **Fast Iteration** — `cargo run` to test
 
 ## System Requirements
 
@@ -37,32 +39,31 @@ ExoSuite is a native Windows application that provides a unified interface for a
 ## Building
 
 ```powershell
-# Configure
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-
 # Build
-cmake --build build --config Release
+cargo build --release
+
+# Run
+cargo run --release
 ```
 
 ## Project Structure
 
 ```
 ExoSuite/
-├── src/           # C++ source code
+├── src/           # Rust source code
+│   └── main.rs    # Entry point
 ├── ui/            # Slint UI files (.slint)
-├── resources/     # Icons, assets
-├── docs/          # Documentation
-└── build/         # Build output (generated)
+│   └── main.slint # Main window
+├── Cargo.toml     # Dependencies
+└── build.rs       # Slint build script
 ```
 
 ## Extension Architecture
 
 Extensions can operate in two modes:
 
-1. **Standalone** — Independent `.exe` with its own installer
-2. **Integrated** — Plugin `.dll` loaded by ExoSuite host
-
-Each extension lives in its own repository and links against shared libraries (`ExoSuite.Core`, `ExoSuite.UI`) when integrated.
+1. **Standalone** — Independent executable
+2. **Integrated** — Plugin loaded by ExoSuite host
 
 ## License
 
