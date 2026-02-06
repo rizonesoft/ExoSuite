@@ -35,7 +35,7 @@ This document outlines the complete development roadmap from initial structure t
 - [x] Verify extension compilation output to system folder
 
 ### 0.3: Project Structure & Scaffolding
-- [ ] Create Core namespace structure (CplInterop, CplLoader, CplItem)
+- [x] Create Core namespace structure (CplInterop, CplLoader, CplItem)
 - [ ] Create UI namespace structure (MainWindow)
 - [ ] Create Resources folder structure
 - [ ] Add application icon (Graphics/ExoSuite.ico)

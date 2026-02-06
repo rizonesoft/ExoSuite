@@ -245,10 +245,16 @@ set(EXOSUITE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(EXOSUITE_SOURCES
     ${EXOSUITE_SRC_DIR}/main.cpp
     ${EXOSUITE_SRC_DIR}/Core/Platform.cpp
+    ${EXOSUITE_SRC_DIR}/Core/CplInterop.cpp
+    ${EXOSUITE_SRC_DIR}/Core/CplItem.cpp
+    ${EXOSUITE_SRC_DIR}/Core/CplLoader.cpp
 )
 
 set(EXOSUITE_HEADERS
     ${EXOSUITE_SRC_DIR}/Core/Platform.h
+    ${EXOSUITE_SRC_DIR}/Core/CplInterop.h
+    ${EXOSUITE_SRC_DIR}/Core/CplItem.h
+    ${EXOSUITE_SRC_DIR}/Core/CplLoader.h
 )
 
 # ==============================================================================
