@@ -52,9 +52,10 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# Build
+# Build - use preset build directory
+$PresetBuildDir = Join-Path $BuildDir $Preset
 Write-Host "`n[2/2] Building $Config..." -ForegroundColor Yellow
-cmake --build $BuildDir --config $Config
+cmake --build $PresetBuildDir --config $Config
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed!" -ForegroundColor Red
     exit 1
