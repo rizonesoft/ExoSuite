@@ -103,8 +103,49 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-# Extensions output to extensions/ folder
-set(EXOSUITE_EXTENSIONS_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/extensions)
+# Extensions output to system/ folder in app root
+set(EXOSUITE_SYSTEM_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/system)
+
+# ==============================================================================
+# Extension Helper Function
+# ==============================================================================
+
+# Helper function to create extension DLL projects that output to system/ folder
+function(add_exosuite_extension TARGET_NAME)
+    # Create shared library (DLL)
+    add_library(${TARGET_NAME} SHARED ${ARGN})
+    
+    # Output to system/ folder
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${EXOSUITE_SYSTEM_OUTPUT_DIRECTORY}
+        LIBRARY_OUTPUT_DIRECTORY ${EXOSUITE_SYSTEM_OUTPUT_DIRECTORY}
+        ARCHIVE_OUTPUT_DIRECTORY ${EXOSUITE_SYSTEM_OUTPUT_DIRECTORY}
+        # Per-config output directories
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${EXOSUITE_SYSTEM_OUTPUT_DIRECTORY}
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${EXOSUITE_SYSTEM_OUTPUT_DIRECTORY}
+        LIBRARY_OUTPUT_DIRECTORY_DEBUG ${EXOSUITE_SYSTEM_OUTPUT_DIRECTORY}
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE ${EXOSUITE_SYSTEM_OUTPUT_DIRECTORY}
+    )
+    
+    # Static runtime for consistency with main executable
+    if(MSVC)
+        set_property(TARGET ${TARGET_NAME} PROPERTY
+            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
+    
+    # Common include directories
+    target_include_directories(${TARGET_NAME} PRIVATE ${EXOSUITE_SRC_DIR})
+    
+    # Common Windows libraries
+    target_link_libraries(${TARGET_NAME} PRIVATE
+        user32
+        gdi32
+        shell32
+        ole32
+        oleaut32
+        advapi32
+    )
+endfunction()
 
 # ==============================================================================
 # C++/WinRT and Windows App SDK Configuration (WinUI3)
