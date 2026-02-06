@@ -27,9 +27,9 @@ This document outlines the complete development roadmap from initial structure t
 - [x] Create build scripts (build.bat, build.ps1)
 - [x] Configure build configurations (Debug, Release)
 - [x] Set up single executable configuration
-- [ ] Configure extension projects to output to `system/` folder
-- [ ] Set up CMake targets for extension compilation
-- [ ] Create solution structure for main app + extensions
+- [x] Configure extension projects to output to `system/` folder in app root
+- [x] Set up CMake targets for extension compilation
+- [x] Create solution structure for main app + extensions
 - [ ] Test Release compilation (64-bit only)
 - [ ] Verify standalone executable creation (64-bit)
 - [ ] Verify extension compilation output to system folder
@@ -39,31 +39,24 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Create UI namespace structure (MainWindow)
 - [ ] Create Resources folder structure
 - [ ] Add application icon (Graphics/ExoSuite.ico)
-- [ ] **Dual-Mode Extension Architecture**:
+- [ ] **Dual-Mode Extension Architecture** (Monorepo):
   - [ ] Design extensions to run both standalone and integrated into ExoSuite
-  - [ ] Each extension is its own GitHub repository (independent development/releases)
-  - [ ] Create `ExoSuite.Shared` library repository for common components
-  - [ ] Extensions link against shared libraries when integrated into ExoSuite
+  - [x] All extensions live in `extensions/` directory (monorepo approach)
+  - [ ] Extensions link against shared libraries in `shared/`
   - [ ] Standalone mode: compile as independent executable (.exe)
   - [ ] Integrated mode: compile as plugin DLL for ExoSuite host
   - [ ] Create extension manifest format (JSON) for metadata and capabilities
   - [ ] See `docs/dev/extension-architecture.md` for details
-- [ ] **Shared Library Infrastructure**:
+- [ ] **Shared Library Infrastructure** (in `shared/`):
   - [ ] Create `ExoSuite.Core` shared library (common types, interfaces)
   - [ ] Create `ExoSuite.UI` shared library (WinUI3 common controls, themes)
   - [ ] Create `ExoSuite.Interop` shared library (Win32 API helpers)
   - [ ] Version shared libraries with semantic versioning
-  - [ ] Support side-by-side library versions for compatibility
-- [ ] **Extension Installation System**:
-  - [ ] Install extensions into `extensions/` folder
-  - [ ] Support installation from GitHub releases
-  - [ ] Support local extension installation (drag-and-drop)
-  - [ ] Extension dependency resolution (shared library versions)
-  - [ ] Extension update mechanism
-- [ ] **Extension Template Repository**:
-  - [ ] Create `ExoSuite.ExtensionTemplate` starter repository
-  - [ ] CMake configuration for dual-mode builds
-  - [ ] GitHub Actions CI/CD for building both modes
+- [ ] **Extension System**:
+  - [ ] Extensions built alongside main app in monorepo
+  - [ ] Extension DLLs output to `system/` folder
+  - [ ] Create extension template in `extensions/_template/`
+  - [ ] CMake configuration for extension builds
   - [ ] Documentation and examples
 - [ ] Create application manifest
 - [ ] Set up version numbering system
