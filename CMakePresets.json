@@ -7,7 +7,7 @@
     },
     "configurePresets": [
         {
-            "name": "default",
+            "name": "base",
             "hidden": true,
             "generator": "Visual Studio 18 2026",
             "architecture": {
@@ -20,10 +20,20 @@
             }
         },
         {
+            "name": "default",
+            "displayName": "Default (x64 Debug)",
+            "description": "Default development configuration",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
             "name": "debug",
             "displayName": "Debug (x64)",
             "description": "Debug build for development",
-            "inherits": "default",
+            "inherits": "base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
@@ -32,7 +42,7 @@
             "name": "release",
             "displayName": "Release (x64)",
             "description": "Optimized release build",
-            "inherits": "default",
+            "inherits": "base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
@@ -41,7 +51,7 @@
             "name": "relwithdebinfo",
             "displayName": "Release with Debug Info (x64)",
             "description": "Release build with debug symbols",
-            "inherits": "default",
+            "inherits": "base",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo"
             }

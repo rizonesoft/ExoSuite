@@ -27,6 +27,16 @@ if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "ExoSuite requires 64-bit compilation. 32-bit is not supported.")
 endif()
 
+# Enforce Windows 10+ (build system check)
+if(WIN32)
+    cmake_host_system_information(RESULT WIN_VERSION QUERY WINDOWS_REGISTRY
+        "HKLM/SOFTWARE/Microsoft/Windows NT/CurrentVersion"
+        VALUE "CurrentBuildNumber")
+    if(WIN_VERSION AND WIN_VERSION LESS 10240)
+        message(FATAL_ERROR "ExoSuite requires Windows 10 or later. Detected build: ${WIN_VERSION}")
+    endif()
+endif()
+
 # C++23 Standard (required)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
