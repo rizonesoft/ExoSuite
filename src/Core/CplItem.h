@@ -70,7 +70,7 @@ public:
 
     /// Whether this applet requires administrator privileges
     bool RequiresAdmin() const { return m_requiresAdmin; }
-    void SetRequiresAdmin(bool requires) { m_requiresAdmin = requires; }
+    void SetRequiresAdmin(bool value) { m_requiresAdmin = value; }
 
     /// Whether this is a built-in ExoSuite extension vs. system CPL
     bool IsExtension() const { return m_isExtension; }
