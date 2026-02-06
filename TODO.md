@@ -31,8 +31,8 @@ This document outlines the complete development roadmap from initial structure t
 - [x] Set up CMake targets for extension compilation
 - [x] Create solution structure for main app + extensions
 - [x] Test Release compilation (64-bit only)
-- [ ] Verify standalone executable creation (64-bit)
-- [ ] Verify extension compilation output to system folder
+- [x] Verify standalone executable creation (64-bit)
+- [x] Verify extension compilation output to system folder
 
 ### 0.3: Project Structure & Scaffolding
 - [ ] Create Core namespace structure (CplInterop, CplLoader, CplItem)
