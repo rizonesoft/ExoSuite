@@ -21,6 +21,42 @@ This document outlines the complete development roadmap from initial structure t
 
 ---
 
+## Phase 0.0: UI Shell Setup (PRIORITY)
+
+> **This is the first thing to implement** — Get a working window on screen before anything else.
+
+### 0.0.1: Development Environment
+- [ ] Install Slint VS Code extension for live preview
+- [ ] Verify CMake is available (version 3.21+)
+- [ ] Verify C++23 compiler available (MSVC 14.40+)
+
+### 0.0.2: Slint Project Setup
+- [ ] Create `CMakeLists.txt` with Slint FetchContent
+- [ ] Create project directory structure:
+  ```
+  ExoSuite/
+  ├── src/main.cpp
+  ├── ui/main.slint
+  └── CMakeLists.txt
+  ```
+- [ ] Create minimal `src/main.cpp` (Slint app entry point)
+- [ ] Create minimal `ui/main.slint` (empty window)
+
+### 0.0.3: Test Compile & Run
+- [ ] Configure CMake: `cmake -B build`
+- [ ] Build: `cmake --build build --config Release`
+- [ ] Run executable and verify window appears
+- [ ] Test Slint Live Preview in VS Code
+
+### 0.0.4: Basic UI Shell Layout
+- [ ] Add NavigationView/sidebar to `main.slint`
+- [ ] Add content area (ListView placeholder)
+- [ ] Add toolbar with placeholder buttons
+- [ ] Add status bar
+- [ ] Verify dark/light theme switching works
+
+---
+
 ## Phase 0: Project Foundation & Setup
 
 ### 0.1: Repository Setup
@@ -66,7 +102,7 @@ This document outlines the complete development roadmap from initial structure t
   - [ ] See `docs/dev/extension-architecture.md` for details
 - [ ] **Shared Library Infrastructure** (in `shared/`):
   - [ ] Create `ExoSuite.Core` shared library (common types, interfaces)
-  - [ ] Create `ExoSuite.UI` shared library (WinUI3 common controls, themes)
+  - [ ] Create `ExoSuite.UI` shared library (Slint common controls, themes)
   - [ ] Create `ExoSuite.Interop` shared library (Win32 API helpers)
   - [ ] Version shared libraries with semantic versioning
 - [ ] **Extension System**:
