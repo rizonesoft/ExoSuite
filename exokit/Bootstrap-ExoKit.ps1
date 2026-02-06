@@ -22,19 +22,22 @@ Write-Host "================" -ForegroundColor Cyan
 
 # Tool versions
 $RustVersion = "stable"
+$LlvmVersion = "20250114"
 $CmakeVersion = "3.31.4"
 $NinjaVersion = "1.12.1"
 
 # Directories
 $RustDir = Join-Path $ExoKitRoot "rust"
+$LlvmDir = Join-Path $ExoKitRoot "llvm-mingw"
 $CmakeDir = Join-Path $ExoKitRoot "cmake"
 $NinjaDir = Join-Path $ExoKitRoot "ninja"
 
 # Download URLs
+$LlvmUrl = "https://github.com/mstorsjo/llvm-mingw/releases/download/$LlvmVersion/llvm-mingw-$LlvmVersion-ucrt-x86_64.zip"
 $CmakeUrl = "https://github.com/Kitware/CMake/releases/download/v$CmakeVersion/cmake-$CmakeVersion-windows-x86_64.zip"
 $NinjaUrl = "https://github.com/ninja-build/ninja/releases/download/v$NinjaVersion/ninja-win.zip"
 
-function Download-Tool {
+function Install-Tool {
     param(
         [string]$Name,
         [string]$Url,
@@ -77,7 +80,7 @@ function Download-Tool {
 
 # Install Rust via rustup
 Write-Host ""
-Write-Host "[1/3] Rust Toolchain" -ForegroundColor Cyan
+Write-Host "[1/4] Rust Toolchain" -ForegroundColor Cyan
 
 if ((Test-Path (Join-Path $RustDir "bin\cargo.exe")) -and -not $Force) {
     Write-Host "  [SKIP] Rust already installed" -ForegroundColor DarkGray
@@ -99,15 +102,20 @@ else {
     Write-Host "  [OK] Rust installed" -ForegroundColor Green
 }
 
+# Install LLVM-MinGW (for C++ extensions)
+Write-Host ""
+Write-Host "[2/4] LLVM-MinGW" -ForegroundColor Cyan
+Install-Tool -Name "llvm-mingw" -Url $LlvmUrl -DestDir $LlvmDir
+
 # Install CMake
 Write-Host ""
-Write-Host "[2/3] CMake" -ForegroundColor Cyan
-Download-Tool -Name "cmake" -Url $CmakeUrl -DestDir $CmakeDir
+Write-Host "[3/4] CMake" -ForegroundColor Cyan
+Install-Tool -Name "cmake" -Url $CmakeUrl -DestDir $CmakeDir
 
 # Install Ninja
 Write-Host ""
-Write-Host "[3/3] Ninja" -ForegroundColor Cyan
-Download-Tool -Name "ninja" -Url $NinjaUrl -DestDir $NinjaDir
+Write-Host "[4/4] Ninja" -ForegroundColor Cyan
+Install-Tool -Name "ninja" -Url $NinjaUrl -DestDir $NinjaDir
 
 Write-Host ""
 Write-Host "ExoKit bootstrap complete!" -ForegroundColor Green
