@@ -2,22 +2,20 @@
 
 This document outlines the complete development roadmap from initial structure to production-ready release.
 
-**Tech Stack**: **Rust**, **Slint** UI Framework (No .NET Framework Required)
+**Tech Stack**: C++23, Native Win32 API, CMake + Ninja (LLVM-MinGW) — No .NET Framework Required
 
 ---
 
-## Why Rust + Slint?
-
-**Slint** is a modern declarative UI toolkit natively written in Rust.
+## Why C++ / Win32?
 
 | Feature | Benefit |
 |---------|--------|
-| **Simple Build** | Just `cargo build` — no CMake, no MSVC setup |
-| **Declarative UI** | Intuitive `.slint` file format |
-| **Live Preview** | VS Code extension for real-time UI preview |
-| **Dark/Light Mode** | Built-in system theme detection |
-| **Safe Win32** | `windows` crate with Rust safety guarantees |
-| **Fast Iteration** | `cargo run` to test immediately |
+| **Zero Dependencies** | No runtime needed — runs on any Windows 10/11 machine |
+| **Maximum Performance** | Direct hardware access, no GC, no JIT |
+| **Tiny Binaries** | Single .exe per extension, < 1 MB typical |
+| **Full Win32 Access** | Complete access to all Windows APIs |
+| **SVG Icons** | Modern icon system via Direct2D or nanosvg |
+| **ExoKit Toolchain** | Portable build (LLVM-MinGW, CMake, Ninja) |
 
 ---
 
@@ -26,33 +24,37 @@ This document outlines the complete development roadmap from initial structure t
 > **This is the first thing to implement** — Get a working window on screen before anything else.
 
 ### 0.0.1: Development Environment
-- [x] Install Slint VS Code extension for live preview (manual: `Slint.slint`)
-- [ ] Verify Rust toolchain: `rustc --version` (1.70+)
-- [ ] Verify Cargo: `cargo --version`
+- [x] Set up ExoKit portable toolchain (LLVM-MinGW, CMake, Ninja)
+- [ ] Verify LLVM-MinGW: `clang++ --version`
+- [ ] Verify CMake: `cmake --version` (3.25+)
+- [ ] Verify Ninja: `ninja --version`
 
-### 0.0.2: Rust Project Setup
-- [ ] Create `Cargo.toml` with Slint and windows crate
+### 0.0.2: C++ Project Setup
+- [ ] Create root `CMakeLists.txt` for monorepo workspace
 - [ ] Create project directory structure:
   ```
   ExoSuite/
-  ├── src/main.rs
-  ├── ui/main.slint
-  ├── build.rs
-  └── Cargo.toml
+  ├── shell/
+  │   ├── CMakeLists.txt
+  │   ├── src/main.cpp
+  │   └── resources/
+  ├── extensions/
+  ├── shared/exo-ui/
+  └── exokit/
   ```
-- [ ] Create minimal `src/main.rs` (Slint app entry point)
-- [ ] Create minimal `ui/main.slint` (empty window)
+- [ ] Create minimal `shell/src/main.cpp` (Win32 entry point)
+- [ ] Create `shell/CMakeLists.txt`
+- [ ] Add CMakePresets.json for Debug/Release configurations
 
 ### 0.0.3: Test Compile & Run
-- [ ] Build: `cargo build --release`
-- [ ] Run: `cargo run --release`
-- [ ] Verify window appears
-- [ ] Test Slint Live Preview in VS Code (optional)
+- [ ] Build: `.\exokit\Build-Shell.ps1 -Release`
+- [ ] Run: `Bin\Release\ExoSuite.exe`
+- [ ] Verify window appears (WS_OVERLAPPEDWINDOW)
 
 ### 0.0.4: Basic UI Shell Layout
-- [ ] Add NavigationView/sidebar to `main.slint`
+- [ ] Add NavigationView/sidebar (owner-draw or custom control)
 - [ ] Add content area (ListView placeholder)
-- [ ] Add toolbar with placeholder buttons
+- [ ] Add toolbar with SVG icon buttons
 - [ ] Add status bar
 - [ ] Verify dark/light theme switching works
 
@@ -61,28 +63,30 @@ This document outlines the complete development roadmap from initial structure t
 ## Phase 0: Project Foundation & Setup
 
 ### 0.1: Repository Setup
-- [ ] Create directory structure (src, build, resources, docs, standards, prompts)
-- [ ] Create CMake project with C++23 configuration
-- [ ] Initialize Git repository
-- [ ] Create .gitignore for C++ projects
-- [ ] Create README.md with project overview
-- [ ] Set up GitHub repository
+- [x] Create directory structure (extensions, shared, exokit, installers)
+- [x] Create GitHub repository
+- [x] Create .gitignore for C++ projects
+- [x] Create README.md with project overview
+- [x] Initialize Git repository and push
 - [ ] Set up issue templates
-- [ ] Create initial commit and push to GitHub
+- [ ] Create initial commit with shell skeleton
 
 ### 0.2: Build System Configuration
-- [ ] Create CMakeLists.txt with Slint FetchContent integration
+- [x] Create ExoKit bootstrap (LLVM-MinGW, CMake, Ninja)
+- [x] Create ExoKit init script (PATH setup)
+- [x] Create Build-All.ps1 (shell + extensions)
+- [x] Create Build-Extension.ps1 (single extension)
+- [x] Create Build-Shell.ps1 (main app)
 - [ ] **Target Platform Requirements**:
   - [ ] Set target OS to Windows 10 and Windows 11 only (no Windows 7/8 support)
   - [ ] Configure build for 64-bit (x64) only (no 32-bit support - future standard)
   - [ ] Set platform to x64 in all projects
   - [ ] Update CMake to enforce Windows 10+ requirement
   - [ ] Add platform validation on startup (check OS version, architecture)
-- [ ] Create build scripts (build.bat, build.ps1)
 - [ ] Configure build configurations (Debug, Release)
 - [ ] Set up single executable configuration
-- [ ] Configure extension projects to output to `system/` folder in app root
-- [ ] Set up CMake targets for extension compilation
+- [x] Configure extension projects to output to `Bin/Release/System/` folder
+- [x] Set up CMake targets for extension compilation
 - [ ] Create solution structure for main app + extensions
 - [ ] Test Release compilation (64-bit only)
 - [ ] Verify standalone executable creation (64-bit)
@@ -103,12 +107,12 @@ This document outlines the complete development roadmap from initial structure t
   - [ ] See `docs/dev/extension-architecture.md` for details
 - [ ] **Shared Library Infrastructure** (in `shared/`):
   - [ ] Create `ExoSuite.Core` shared library (common types, interfaces)
-  - [ ] Create `ExoSuite.UI` shared library (Slint common controls, themes)
+  - [ ] Create `ExoSuite.UI` shared library (common controls, themes, SVG icons)
   - [ ] Create `ExoSuite.Interop` shared library (Win32 API helpers)
   - [ ] Version shared libraries with semantic versioning
 - [ ] **Extension System**:
   - [ ] Extensions built alongside main app in monorepo
-  - [ ] Extension DLLs output to `system/` folder
+  - [ ] Extension executables output to `Bin/Release/System/` folder
   - [ ] Create extension template in `extensions/_template/`
   - [ ] CMake configuration for extension builds
   - [ ] Documentation and examples
@@ -119,13 +123,15 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Set up localization/internationalization infrastructure
 - [ ] Create theme system architecture (light/dark/system mode support, accent colors from Windows)
 - [ ] Design performance monitoring infrastructure
-- [ ] **Design UI with Slint**:
-  - [ ] Set up Slint project structure with `.slint` files
-  - [ ] Create `ui/main.slint` main window layout
-  - [ ] Define UI components in `.slint` (ListView, sidebar, toolbar)
+- [ ] **Design UI with Win32 Custom Controls**:
+  - [ ] Set up UI component library structure
+  - [ ] Create main window layout (NavigationView, sidebar, toolbar)
+  - [ ] Define UI components (custom ListView, sidebar, toolbar)
   - [ ] Design plugin host system for loading integrated extensions
   - [ ] Create extension discovery and registration system
   - [ ] Implement extension lifecycle management (load/unload/reload)
+
+---
 
 ## Phase 1: Core Architecture
 
@@ -150,7 +156,7 @@ This document outlines the complete development roadmap from initial structure t
 
 ### 1.2: Configuration Management
 - [ ] Create Settings class
-- [ ] Implement settings file (JSON/YAML)
+- [ ] Implement settings file (JSON)
 - [ ] Create LoadSettings function
 - [ ] Create SaveSettings function
 - [ ] Implement default settings
@@ -163,7 +169,6 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Add settings backup and restore
 - [ ] Create settings validation system
 - [ ] Support settings migration between versions
-- [ ] Implement settings synchronization (if cloud sync added later)
 
 ### 1.3: Versioning System
 - [ ] Create VersionInfo class
@@ -174,7 +179,7 @@ This document outlines the complete development roadmap from initial structure t
 
 ### 1.4: Exception Handling System
 - [ ] Create global unhandled exception handler
-- [ ] Implement ExceptionDialog with WinUI3 ContentDialog
+- [ ] Implement ExceptionDialog with Win32 dialog
 - [ ] Add exception details viewer (expandable sections)
 - [ ] Implement troubleshooting suggestions based on exception type
 - [ ] Add copy-to-clipboard functionality for exception details
@@ -184,7 +189,6 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Create ExceptionReport class for structured exception data
 - [ ] Implement crash reporting (optional, user-configurable)
 - [ ] Add "Send Error Report" option with privacy notice
-- [ ] Create exception analytics (aggregated, anonymous)
 
 ### 1.5: Performance Monitoring & Optimization
 - [ ] Create PerformanceMonitor class
@@ -198,6 +202,8 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Optimize first-run experience
 - [ ] Implement lazy loading strategies
 - [ ] Create memory pool for frequently allocated objects
+
+---
 
 ## Phase 2: CPL Interop Implementation
 
@@ -238,6 +244,8 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Add `RequiresAdministrator` property to `CplItem` class
 - [ ] Test privilege detection with various CPL files
 - [ ] Handle privilege escalation gracefully (request elevation when needed)
+
+---
 
 ## Phase 3: CPL Loader Implementation
 
@@ -282,54 +290,56 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Persist user category preferences
 - [ ] Support "Uncategorized" for applets without category
 
-## Phase 4: User Interface Components (WinUI3)
+---
+
+## Phase 4: User Interface Components (Win32)
 
 ### 4.1: Main Window Layout
-- [ ] Create MainWindow with WinUI3 XAML
+- [ ] Create MainWindow (WS_OVERLAPPEDWINDOW)
 - [ ] Set window properties (title, size, icon)
 - [ ] Add MenuBar (File, View, Help, Tools)
-- [ ] Add CommandBar (view mode buttons)
+- [ ] Add CommandBar/Toolbar (view mode buttons with SVG icons)
 - [ ] Add SplitView for sidebar and main content area
-- [ ] Add Category Sidebar (TreeView or ListView)
+- [ ] Add Category Sidebar (TreeView or custom owner-draw)
 - [ ] Implement category filtering (All, System, Network, Security, etc.)
 - [ ] Add ListView/GridView control for applet display
 - [ ] Implement sidebar collapse/expand functionality
 - [ ] Implement window resize handling
-- [ ] Add InfoBar for status information
+- [ ] Add status bar for information
 - [ ] Design sidebar for scalability (100+ settings/utilities)
-- [ ] Implement smooth animations with WinUI3 animations
+- [ ] Implement smooth animations
 - [ ] Add multi-monitor support (remember position per monitor)
 - [ ] Support window minimizing to system tray
-- [ ] Implement Mica/Acrylic material effects
-- [ ] Add customizable window chrome with WinUI3 TitleBar
+- [ ] Implement Mica/Acrylic-like backdrop effects (DWM)
+- [ ] Add customizable window chrome (dark title bar via DwmSetWindowAttribute)
 
 ### 4.2: ListView/GridView Setup
 - [ ] Configure GridView for Large Icon view
-- [ ] Set up ImageSource for icons
+- [ ] Set up ImageSource for icons (HICON-based)
 - [ ] Add columns for Details view (Name, Category, Description)
 - [ ] Implement item population from CplLoader
 - [ ] Implement category-based filtering
-- [ ] Add double-click/tap event handler
-- [ ] Add right-click context menu (MenuFlyout)
+- [ ] Add double-click event handler
+- [ ] Add right-click context menu
 - [ ] Update view when category selection changes
-- [ ] Implement virtualization for performance (1000+ items)
+- [ ] Implement virtual list for performance (1000+ items)
 - [ ] Add smooth scrolling
 - [ ] Implement drag-and-drop support (reorder favorites)
-- [ ] Add selection highlighting with smooth transitions
+- [ ] Add selection highlighting
 - [ ] Support multi-select mode
 - [ ] Implement keyboard navigation
 
 ### 4.3: View Mode Implementation
-- [ ] Implement Large Icons view (GridView)
+- [ ] Implement Large Icons view
 - [ ] Implement Small Icons view
 - [ ] Implement List view
-- [ ] Implement Details view (ListView with GridView columns)
+- [ ] Implement Details view (report mode)
 - [ ] Add view mode switching logic
 - [ ] Persist view mode in settings
-- [ ] Update CommandBar toggle states
+- [ ] Update toolbar toggle states
 
 ### 4.4: Icon Display
-- [ ] Create icon loading with WinUI3 ImageSource
+- [ ] Create icon loading (HICON/HBITMAP)
 - [ ] Populate icons from CplItem
 - [ ] Assign icons to view items
 - [ ] Handle missing icons gracefully
@@ -364,7 +374,7 @@ This document outlines the complete development roadmap from initial structure t
   - [ ] ExoSuite Page (opens project-specific URL)
   - [ ] Separator
   - [ ] About ExoSuite...
-- [ ] Add keyboard shortcuts (KeyboardAccelerator)
+- [ ] Add keyboard accelerators
 - [ ] Implement menu state updates
 - [ ] **Admin Privilege Handling**:
   - [ ] Detect current process admin status on startup
@@ -374,18 +384,16 @@ This document outlines the complete development roadmap from initial structure t
   - [ ] Show informative tooltip for admin-required CPL items
   - [ ] Handle privilege escalation failures gracefully
   - [ ] Test both admin and non-admin scenarios
-- [ ] Show ProgressRing for long-running tools
 
 ### 4.6: About Dialog
-- [ ] Create AboutDialog with WinUI3 ContentDialog
+- [ ] Create AboutDialog (Win32 DialogBox)
 - [ ] Add application icon/branding
 - [ ] Display version information from VersionInfo
-- [ ] Add ClassicPanel_alt.png image
 - [ ] Include copyright information (Rizonetech (Pty) Ltd)
 - [ ] Add developer credit (Derick Payne)
 - [ ] Add website link (https://rizonesoft.com)
 - [ ] Implement donate link/button
-- [ ] Style with WinUI3 design language
+- [ ] Style with modern look
 - [ ] Make responsive to dialog sizing
 
 ### 4.7: Update Check System
@@ -393,43 +401,34 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Implement XML-based version manifest download
 - [ ] Parse version information from XML file
 - [ ] Compare installed version with latest version
-- [ ] Create update notification with ContentDialog
+- [ ] Create update notification dialog
 - [ ] Display update information (version, release notes, download link)
 - [ ] Add "Check for Updates" menu item handler
 - [ ] Implement background update check on startup (optional)
 - [ ] Handle network errors gracefully
 - [ ] Cache update check results
-- [ ] Support checking from multiple sources (primary + mirror)
 
-### 4.8: NavigationView Implementation
-- [ ] Create NavigationView for ribbon-like experience
-- [ ] Implement navigation items and groups
-- [ ] Create command buttons
-- [ ] Support SVG icon rendering (via Image/PathIcon)
-- [ ] Add quick access toolbar area
-- [ ] Style to match modern Windows appearance
-
-### 4.9: SVG Icon Support
-- [ ] Design SVG icon storage system
-- [ ] Implement SVG path storage
-- [ ] Create PathIcon/FontIcon-based rendering
+### 4.8: SVG Icon Toolbar
+- [ ] Design SVG icon storage system (embedded resources or files)
+- [ ] Implement SVG rendering engine (nanosvg or Direct2D SVG)
+- [ ] Create toolbar with SVG icon buttons
 - [ ] Implement icon caching for performance
-- [ ] Support icon theming (light/dark mode)
+- [ ] Support icon theming (light/dark mode colorization)
 - [ ] Add icon scaling support
-- [ ] Integrate icon library with CommandBar
+- [ ] Integrate icon library with toolbar
 
-### 4.10: CommandBar Implementation
-- [ ] Add view mode toggle buttons (AppBarToggleButton)
+### 4.9: CommandBar / Toolbar Implementation
+- [ ] Add view mode toggle buttons
 - [ ] Add refresh button
 - [ ] Implement button state management
-- [ ] Add tooltips (ToolTipService)
-- [ ] Style CommandBar appropriately
-- [ ] Use PathIcon/FontIcon from icon library
+- [ ] Add tooltips
+- [ ] Style toolbar appropriately
+- [ ] Use SVG icons from icon library
 - [ ] Add theme toggle button (only visible when system theme disabled)
 - [ ] Update icons on theme change
 
-### 4.11: Context Menu
-- [ ] Add "Open" option (MenuFlyout)
+### 4.10: Context Menu
+- [ ] Add "Open" option
 - [ ] Add view mode options
 - [ ] Add separator
 - [ ] Position menu correctly
@@ -438,8 +437,8 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Add "Pin to Quick Access" option
 - [ ] Add "Properties" option (show applet details)
 
-### 4.12: Search & Filter System
-- [ ] Create AutoSuggestBox in main window
+### 4.11: Search & Filter System
+- [ ] Create search bar in toolbar area
 - [ ] Implement real-time search filtering
 - [ ] Support fuzzy search
 - [ ] Add search suggestions/autocomplete
@@ -454,7 +453,7 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Add clear search button
 - [ ] Show search result count
 
-### 4.13: Favorites & Quick Access
+### 4.12: Favorites & Quick Access
 - [ ] Create Favorites system
 - [ ] Add "Favorites" category to sidebar
 - [ ] Implement add/remove from favorites
@@ -466,7 +465,7 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Support favorites groups/categories
 - [ ] Export/import favorites
 
-### 4.14: Recent Items & History
+### 4.13: Recent Items & History
 - [ ] Track recently opened applets
 - [ ] Display "Recently Used" category
 - [ ] Show usage frequency
@@ -475,7 +474,7 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Limit history size (configurable)
 - [ ] Show last used timestamp
 
-### 4.15: Command Palette / Quick Actions
+### 4.14: Command Palette / Quick Actions
 - [ ] Implement command palette (Ctrl+K or Ctrl+Shift+P)
 - [ ] Quick access to all applets via typing
 - [ ] Support keyboard shortcuts for common actions
@@ -484,32 +483,30 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Support command aliases
 - [ ] Customizable keyboard shortcuts
 
-### 4.16: Themes & Customization
-- [ ] Leverage WinUI3 theme system
+### 4.15: Themes & Customization
 - [ ] Implement light theme (default)
-- [ ] Implement dark theme
+- [ ] Implement dark theme (DWM dark mode APIs)
 - [ ] Implement system mode (follows Windows theme preference)
-- [ ] Use Windows accent colors (ThemeResources)
+- [ ] Use Windows accent colors
 - [ ] Persist theme preference
 - [ ] Auto-detect Windows theme preference
 - [ ] Implement smooth theme transitions
 
-### 4.17: Animations & Transitions
-- [ ] Implement smooth fade-in/fade-out with WinUI3 animations
-- [ ] Add slide transitions between views (ConnectedAnimations)
+### 4.16: Animations & Transitions
+- [ ] Implement smooth fade-in/fade-out
+- [ ] Add slide transitions between views
 - [ ] Smooth icon loading animations
 - [ ] Hover effects on interactive elements
 - [ ] Smooth category switching animations
-- [ ] Loading skeleton screens (Shimmer)
-- [ ] ProgressRing/ProgressBar with animations
+- [ ] Loading progress indicators
 - [ ] Minimize animation performance impact
-- [ ] Respect user preference for reduced motion (UISettings)
+- [ ] Respect user preference for reduced motion (SPI_GETCLIENTAREAANIMATION)
 
-### 4.18: Accessibility Features
+### 4.17: Accessibility Features
 - [ ] Implement keyboard navigation throughout UI
-- [ ] Add screen reader support (AutomationProperties)
+- [ ] Add screen reader support (MSAA / UI Automation)
 - [ ] Support high contrast mode
-- [ ] Implement font scaling
+- [ ] Implement font scaling (DPI-aware)
 - [ ] Add colorblind-friendly color schemes
 - [ ] Support Windows Narrator
 - [ ] Keyboard shortcuts for all actions
@@ -517,115 +514,62 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Respect Windows accessibility settings
 - [ ] Add accessibility settings panel
 
+---
+
 ## Phase 5: Core Extensions/Utilities Implementation
 
-> **Extension Architecture**: Each extension below is a separate GitHub repository that can be installed into ExoSuite (using shared libraries) or run as a standalone application.
+> **Extension Architecture**: Each extension lives in `extensions/` within the monorepo. Extensions can run standalone or integrated into ExoSuite via shared libraries.
 
 ### 5.0: Extension Infrastructure Setup
-- [ ] Create `rizonesoft/ExoSuite.Core` repository (shared library)
-- [ ] Create `rizonesoft/ExoSuite.UI` repository (shared UI components)
-- [ ] Create `rizonesoft/ExoSuite.ExtensionTemplate` repository
+- [ ] Create `shared/ExoSuite.Core/` (shared static library)
+- [ ] Create `shared/ExoSuite.UI/` (shared UI components, SVG icons)
+- [ ] Create `extensions/_template/` extension template
 - [ ] Implement extension host in ExoSuite main application
 - [ ] Create extension installer/manager UI
 - [ ] Document extension development workflow
 
-### 5.1: System Properties Utility (System Category)
-- [ ] Create `rizonesoft/ExoSuite.SystemProperties` repository
-- [ ] **Standalone Mode**:
-  - [ ] Build as `SystemProperties.exe` standalone application
-  - [ ] Include all dependencies (self-contained)
-  - [ ] Create standalone installer (optional)
-- [ ] **Integrated Mode**:
-  - [ ] Build as `SystemProperties.dll` plugin
-  - [ ] Link against `ExoSuite.Core` and `ExoSuite.UI` shared libraries
-  - [ ] Register as ExoSuite extension via manifest
-- [ ] Design System Properties dialog layout (Windows 7/10 style)
-- [ ] Create main System Properties window with tabs:
+### 5.1: RegStudio (Registry Editor) — `extensions/regstudio/`
+- [x] Create CMakeLists.txt (C++23, Ninja, LLVM-MinGW)
+- [x] Create main.cpp entry point stub
+- [x] Application manifest (DPI-aware, admin rights)
+- [x] Resource compilation (.rc, icon.ico)
+- [ ] Implement registry tree view (left panel)
+- [ ] Implement value list view (right panel)
+- [ ] Implement registry enumeration (RegEnumKeyExW, RegEnumValueW)
+- [ ] Implement value editing dialogs
+- [ ] Implement key operations (create, delete, rename, export)
+- [ ] Implement search functionality
+- [ ] SVG toolbar with RegStudio-specific actions
+
+### 5.2: System Properties Utility — `extensions/sysprops/`
+- [ ] Create project structure
+- [ ] Design System Properties dialog layout
+- [ ] Create main window with tabs:
   - [ ] Computer Name tab
   - [ ] Hardware tab
   - [ ] Advanced tab
   - [ ] System Protection tab
   - [ ] Remote tab
-- [ ] Use Graphics/Control/System/System.ico as applet icon
-- [ ] Assign to "System" category
-- [ ] **Implement with WinUI3 and C++/WinRT**
+- [ ] Implement Win32 API calls for system changes
+- [ ] Handle UAC elevation for privileged operations
 
-### 5.2: Computer Name Tab
-- [ ] Display current computer name
-- [ ] Display current workgroup/domain
-- [ ] Implement "Change" button for computer name
-- [ ] Implement "Network ID" button
-- [ ] Create computer name change dialog
-- [ ] Validate computer name input
-- [ ] Handle workgroup/domain changes
-- [ ] Request administrator privileges when needed
-- [ ] Show pending restart warning if required
-
-### 5.3: Hardware Tab
-- [ ] Display hardware information:
-  - [ ] Device Manager link
-  - [ ] Driver signing options
-  - [ ] Hardware profiles
-- [ ] Implement Device Manager launch
-- [ ] Create hardware profiles management UI
-- [ ] Display hardware resource information
-
-### 5.4: Advanced Tab
-- [ ] Performance section:
-  - [ ] Performance Options button
-  - [ ] Visual effects settings
-  - [ ] Virtual memory settings
-- [ ] User Profiles section:
-  - [ ] Display user profiles list
-  - [ ] Delete profile functionality
-  - [ ] Copy profile functionality
-- [ ] Startup and Recovery section:
-  - [ ] System startup options
-  - [ ] System failure options
-  - [ ] Memory dump settings
-- [ ] Environment Variables button
-- [ ] Create Performance Options dialog
-- [ ] Create Environment Variables dialog
-
-### 5.5: System Protection Tab
-- [ ] Display available drives for System Restore
-- [ ] Enable/disable System Restore per drive
-- [ ] Configure System Restore settings
-- [ ] Create Restore Point button
-- [ ] System Restore button (launch restore wizard)
-- [ ] Display restore point usage information
-- [ ] Configure restore point space allocation
-
-### 5.6: Remote Tab
-- [ ] Remote Assistance section:
-  - [ ] Enable/disable Remote Assistance
-  - [ ] Configure Remote Assistance settings
-- [ ] Remote Desktop section:
-  - [ ] Enable/disable Remote Desktop
-  - [ ] Configure Remote Desktop options
-  - [ ] Select users allowed for Remote Desktop
-- [ ] Create remote settings dialogs
-
-### 5.7: System Information Integration
+### 5.3: System Information — `extensions/sysinfo/`
 - [ ] Display Windows edition and version
 - [ ] Display processor information
 - [ ] Display installed memory (RAM)
 - [ ] Display system type (32-bit/64-bit)
 - [ ] Display computer name and domain
 - [ ] Display product ID and activation status
-- [ ] Integrate Windows Management Instrumentation (WMI) via C++
-- [ ] Create SystemInformation class for data retrieval
+- [ ] Integrate WMI via COM
 
-### 5.8: System Properties Win32 API
-- [ ] Implement Windows API calls for system changes
-- [ ] Handle SetComputerName/SetComputerNameEx for name changes
-- [ ] Implement registry modifications for system settings
-- [ ] Handle UAC elevation for privileged operations
-- [ ] Add error handling for system operations
-- [ ] Create SystemPropertiesInterop class for Windows API calls
+---
 
-## Phase 6-10: Extensions
-(Same extension items as before, all marked as incomplete, implemented with C++/WinRT and WinUI3)
+## Phase 6-10: Additional Extensions
+
+> Same extension items as above, all C++23/Win32, built with CMake+Ninja.
+> Each extension outputs to `Bin/Release/System/` via ExoKit build scripts.
+
+---
 
 ## Phase 11: Applet Execution (Core Functionality)
 
@@ -657,7 +601,7 @@ This document outlines the complete development roadmap from initial structure t
   - [ ] Provide keyboard shortcut to restart as admin
 
 ### 11.1: Double-Click Handling
-- [ ] Implement item double-click/tap event
+- [ ] Implement item double-click event
 - [ ] Get selected CplItem
 - [ ] Check admin requirements before execution
 - [ ] Execute applet using rundll32.exe (for external .cpl)
@@ -671,7 +615,7 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Implement direct execution for internal applets
 - [ ] Check admin requirements before execution
 - [ ] Handle UAC elevation if needed
-- [ ] Launch processes with appropriate privilege level (CreateProcess/ShellExecute)
+- [ ] Launch processes with appropriate privilege level (CreateProcess/ShellExecuteEx)
 - [ ] Monitor process execution
 - [ ] Add alternative execution methods if needed
 
@@ -682,21 +626,53 @@ This document outlines the complete development roadmap from initial structure t
 - [ ] Handle missing .cpl files
 - [ ] Handle permission denied errors
 
+---
+
 ## Phase 12-18: Polish, Distribution & Release
-(Same items as before, all marked as incomplete, adapted for C++ build system and WinUI3)
+
+### 12: Testing & QA
+- [ ] Unit testing framework setup
+- [ ] Integration tests for CPL loading
+- [ ] UI automation tests
+- [ ] Performance benchmarks
+- [ ] Memory leak detection (AddressSanitizer)
+
+### 13: Distribution
+- [ ] Inno Setup installer script
+- [ ] Portable mode support (settings in app directory)
+- [ ] Update checker (XML version manifest)
+- [ ] About dialog with version info
+- [ ] GitHub Release automation
+
+### 14: Final Polish
+- [ ] Code signing (optional)
+- [ ] Documentation
+- [ ] README with screenshots
+- [ ] Changelog generation
+- [ ] License compliance
+
+---
+
+## Build Output Structure
+
+```
+Bin/
+└── Release/
+    ├── ExoSuite.exe          ← Main shell (from shell/)
+    └── System/
+        ├── RegStudio.exe     ← Registry Editor (from extensions/regstudio/)
+        ├── SysProps.exe      ← System Properties (from extensions/sysprops/)
+        └── SysInfo.exe       ← System Info (from extensions/sysinfo/)
+```
+
+---
 
 ## Notes
 
-- **Tech Stack**: C++23, Slint UI Framework - No .NET Framework Required
+- **Tech Stack**: C++23, Win32 API, CMake + Ninja (LLVM-MinGW)
+- **No dependencies**: No .NET, no WinUI3, no Rust, no web technologies
+- **ExoKit**: Portable toolchain — `.\exokit\Bootstrap-ExoKit.ps1` to install tools
+- **Build**: `.\exokit\Build-All.ps1 -Release` builds everything
 - Each phase should be completed before moving to the next
 - After completing each task, build, test, commit, and push
-- Keep documentation updated throughout development
-- Follow coding standards defined in `standards/` folder
-- Use prompt templates from `prompts/` folder for AI assistance
-
-## Resources
-
-- [Slint Documentation](https://slint.dev/docs)
-- [Slint C++ Tutorial](https://slint.dev/docs/tutorial/cpp)
-- [Slint GitHub](https://github.com/slint-ui/slint)
-- [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=Slint.slint)
+- Follow bare metal engineering standards (zero-dependency Win32)

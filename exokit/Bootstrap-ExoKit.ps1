@@ -3,7 +3,7 @@
     Bootstrap ExoKit toolchain for ExoSuite.
 
 .DESCRIPTION
-    Downloads and installs the required build tools into the exokit/ folder.
+    Downloads and installs the required C++ build tools into the exokit/ folder.
     Run this once before building ExoSuite.
 
 .EXAMPLE
@@ -21,13 +21,11 @@ Write-Host "ExoKit Bootstrap" -ForegroundColor Cyan
 Write-Host "================" -ForegroundColor Cyan
 
 # Tool versions
-$RustVersion = "stable"
 $LlvmVersion = "20251216"
 $CmakeVersion = "4.2.3"
 $NinjaVersion = "1.13.1"
 
 # Directories
-$RustDir = Join-Path $ExoKitRoot "rust"
 $LlvmDir = Join-Path $ExoKitRoot "llvm-mingw"
 $CmakeDir = Join-Path $ExoKitRoot "cmake"
 $NinjaDir = Join-Path $ExoKitRoot "ninja"
@@ -78,43 +76,19 @@ function Install-Tool {
     Write-Host "  [OK] $Name installed" -ForegroundColor Green
 }
 
-# Install Rust via rustup
+# Install LLVM-MinGW
 Write-Host ""
-Write-Host "[1/4] Rust Toolchain" -ForegroundColor Cyan
-
-if ((Test-Path (Join-Path $RustDir "bin\cargo.exe")) -and -not $Force) {
-    Write-Host "  [SKIP] Rust already installed" -ForegroundColor DarkGray
-}
-else {
-    Write-Host "  [INSTALL] Rust $RustVersion..." -ForegroundColor Yellow
-    
-    # Set RUSTUP_HOME and CARGO_HOME to ExoKit
-    $env:RUSTUP_HOME = $RustDir
-    $env:CARGO_HOME = $RustDir
-    
-    # Download and run rustup-init
-    $rustupInit = Join-Path $env:TEMP "rustup-init.exe"
-    Invoke-WebRequest -Uri "https://win.rustup.rs/x86_64" -OutFile $rustupInit -UseBasicParsing
-    
-    & $rustupInit -y --default-toolchain $RustVersion --no-modify-path
-    
-    Remove-Item $rustupInit -Force
-    Write-Host "  [OK] Rust installed" -ForegroundColor Green
-}
-
-# Install LLVM-MinGW (for C++ extensions)
-Write-Host ""
-Write-Host "[2/4] LLVM-MinGW" -ForegroundColor Cyan
+Write-Host "[1/3] LLVM-MinGW" -ForegroundColor Cyan
 Install-Tool -Name "llvm-mingw" -Url $LlvmUrl -DestDir $LlvmDir
 
 # Install CMake
 Write-Host ""
-Write-Host "[3/4] CMake" -ForegroundColor Cyan
+Write-Host "[2/3] CMake" -ForegroundColor Cyan
 Install-Tool -Name "cmake" -Url $CmakeUrl -DestDir $CmakeDir
 
 # Install Ninja
 Write-Host ""
-Write-Host "[4/4] Ninja" -ForegroundColor Cyan
+Write-Host "[3/3] Ninja" -ForegroundColor Cyan
 Install-Tool -Name "ninja" -Url $NinjaUrl -DestDir $NinjaDir
 
 Write-Host ""

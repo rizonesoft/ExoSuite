@@ -33,65 +33,47 @@ if (-not (Test-Path $ExtPath)) {
     exit 1
 }
 
-$SystemDir = Join-Path $RepoRoot "Bin\Release\System"
-New-Item -ItemType Directory -Force -Path $SystemDir | Out-Null
-
-Write-Host "[1/2] Compiling $Name..." -ForegroundColor Cyan
-
 $CmakeLists = Join-Path $ExtPath "CMakeLists.txt"
-$CargoToml = Join-Path $ExtPath "Cargo.toml"
-
-if (Test-Path $CargoToml) {
-    # Rust extension
-    $cargoArgs = @("build", "-p", $Name)
-    if ($Release) { $cargoArgs += "--release" }
-    & cargo @cargoArgs
-    
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Build failed!" -ForegroundColor Red
-        exit 1
-    }
-    
-    if ($Release) {
-        $ExtExe = Join-Path $RepoRoot "target\release\$Name.exe"
-        if (Test-Path $ExtExe) {
-            Copy-Item $ExtExe -Destination $SystemDir -Force
-        }
-    }
-}
-elseif (Test-Path $CmakeLists) {
-    # C++ extension (CMake)
-    $BuildDir = Join-Path $ExtPath "build"
-    if (-not (Test-Path $BuildDir)) {
-        New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
-    }
-    
-    Push-Location $BuildDir
-    cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-    ninja
-    Pop-Location
-    
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Build failed!" -ForegroundColor Red
-        exit 1
-    }
-    
-    # Copy built exe to System folder (check both source bin/ and build/ folder)
-    $ExtBinDir = Join-Path $ExtPath "bin"
-    $BuiltExe = $null
-    if (Test-Path $ExtBinDir) {
-        $BuiltExe = Get-ChildItem -Path $ExtBinDir -Filter "*.exe" | Select-Object -First 1
-    }
-    if (-not $BuiltExe) {
-        $BuiltExe = Get-ChildItem -Path $BuildDir -Filter "*.exe" -Exclude "*.dir" | Select-Object -First 1
-    }
-    if ($BuiltExe) {
-        Copy-Item $BuiltExe.FullName -Destination $SystemDir -Force
-    }
-}
-else {
-    Write-Host "No build system found for $Name" -ForegroundColor Red
+if (-not (Test-Path $CmakeLists)) {
+    Write-Host "No CMakeLists.txt found for $Name" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "[2/2] Done! Output: Bin\Release\System\$Name.exe" -ForegroundColor Green
+$SystemDir = Join-Path $RepoRoot "Bin\Release\System"
+New-Item -ItemType Directory -Force -Path $SystemDir | Out-Null
+
+$BuildType = if ($Release) { "Release" } else { "Debug" }
+$BuildDir = Join-Path $ExtPath "build"
+
+Write-Host "[1/3] Configuring $Name ($BuildType)..." -ForegroundColor Cyan
+
+if (-not (Test-Path $BuildDir)) {
+    New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
+}
+
+Push-Location $BuildDir
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=$BuildType -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+if ($LASTEXITCODE -ne 0) {
+    Pop-Location
+    Write-Host "CMake configure failed!" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "[2/3] Compiling $Name..." -ForegroundColor Cyan
+ninja
+Pop-Location
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Build failed!" -ForegroundColor Red
+    exit 1
+}
+
+# Copy built exe to System folder
+$BuiltExe = Get-ChildItem -Path $BuildDir -Filter "*.exe" -Exclude "*.dir" | Select-Object -First 1
+if ($BuiltExe) {
+    Copy-Item $BuiltExe.FullName -Destination $SystemDir -Force
+    Write-Host "[3/3] Done! Output: Bin\Release\System\$($BuiltExe.Name)" -ForegroundColor Green
+}
+else {
+    Write-Host "[3/3] Warning: No .exe found in build output" -ForegroundColor Yellow
+}

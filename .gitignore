@@ -1,9 +1,9 @@
-# Rust build outputs
-/target/
+# C++ build outputs
+/build/
+/out/
 /Bin/
 
 # ExoKit toolchain (downloaded via bootstrap)
-/exokit/rust/
 /exokit/llvm-mingw/
 /exokit/cmake/
 /exokit/ninja/
@@ -11,6 +11,9 @@
 # Extension build artifacts
 extensions/*/build/
 extensions/*/bin/
+
+# Shell build artifacts
+shell/build/
 
 # IDE
 .vs/

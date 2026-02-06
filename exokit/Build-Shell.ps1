@@ -6,7 +6,7 @@
     Builds the ExoSuite shell to Bin/Release/ExoSuite.exe with progress display.
 
 .EXAMPLE
-    .\build\Build-Shell.ps1
+    .\exokit\Build-Shell.ps1 -Release
 #>
 
 param(
@@ -16,59 +16,58 @@ param(
 $ErrorActionPreference = 'Stop'
 $RepoRoot = Split-Path $PSScriptRoot -Parent
 
-# Initialize ExoKit only if Rust toolchain is present
-$ExoKitRust = Join-Path $RepoRoot "exokit\rust\bin\cargo.exe"
-if (Test-Path $ExoKitRust) {
-    $ExoKitInit = Join-Path $RepoRoot "exokit\Init-ExoKit.ps1"
+# Initialize ExoKit
+$ExoKitInit = Join-Path $RepoRoot "exokit\Init-ExoKit.ps1"
+if (Test-Path $ExoKitInit) {
     . $ExoKitInit -Quiet
 }
 
-# Find cargo (ExoKit or system)
-$CargoPath = $null
-if (Test-Path $ExoKitRust) {
-    $CargoPath = $ExoKitRust
-}
-else {
-    # Fall back to system cargo
-    $SystemCargo = Join-Path $env:USERPROFILE ".cargo\bin\cargo.exe"
-    if (Test-Path $SystemCargo) {
-        $CargoPath = $SystemCargo
-    }
-}
-
-if (-not $CargoPath) {
-    Write-Host "Error: cargo not found. Please install Rust or populate ExoKit." -ForegroundColor Red
+$ShellDir = Join-Path $RepoRoot "shell"
+if (-not (Test-Path $ShellDir)) {
+    Write-Host "Error: shell/ directory not found." -ForegroundColor Red
     exit 1
 }
 
-Write-Host "[1/2] Compiling ExoSuite shell..." -ForegroundColor Cyan
+$BuildType = if ($Release) { "Release" } else { "Debug" }
+$BuildDir = Join-Path $ShellDir "build"
 
-# Force progress display
-$env:CARGO_TERM_PROGRESS_WHEN = "always"
-$env:CARGO_TERM_PROGRESS_WIDTH = "80"
+Write-Host "[1/3] Configuring ExoSuite shell ($BuildType)..." -ForegroundColor Cyan
 
-# Run cargo build
-$cargoArgs = @("build", "-p", "exosuite")
-if ($Release) { $cargoArgs += "--release" }
+if (-not (Test-Path $BuildDir)) {
+    New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
+}
 
-& $CargoPath @cargoArgs
+Push-Location $BuildDir
+cmake .. -G Ninja -DCMAKE_BUILD_TYPE=$BuildType -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+if ($LASTEXITCODE -ne 0) {
+    Pop-Location
+    Write-Host "CMake configure failed!" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "[2/3] Compiling ExoSuite shell..." -ForegroundColor Cyan
+ninja
+Pop-Location
+
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed!" -ForegroundColor Red
     exit 1
 }
 
-# Copy to Bin/Release if release build
+# Copy to Bin/Release
 if ($Release) {
     $OutputDir = Join-Path $RepoRoot "Bin\Release"
-    $TargetExe = Join-Path $RepoRoot "target\release\ExoSuite.exe"
-    
-    if (-not (Test-Path $OutputDir)) {
-        New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+
+    $BuiltExe = Get-ChildItem -Path $BuildDir -Filter "ExoSuite.exe" | Select-Object -First 1
+    if ($BuiltExe) {
+        Copy-Item $BuiltExe.FullName -Destination $OutputDir -Force
+        Write-Host "[3/3] Done! Output: Bin\Release\ExoSuite.exe" -ForegroundColor Green
     }
-    
-    Copy-Item $TargetExe -Destination $OutputDir -Force
-    Write-Host "[2/2] Done! Output: Bin\Release\ExoSuite.exe" -ForegroundColor Green
+    else {
+        Write-Host "[3/3] Warning: ExoSuite.exe not found in build output" -ForegroundColor Yellow
+    }
 }
 else {
-    Write-Host "[2/2] Done! Output: target\debug\ExoSuite.exe" -ForegroundColor Green
+    Write-Host "[3/3] Done! Output: shell\build\ExoSuite.exe" -ForegroundColor Green
 }

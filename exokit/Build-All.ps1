@@ -7,7 +7,7 @@
     Output goes to Bin/Release/ for shell and Bin/Release/System/ for extensions.
 
 .EXAMPLE
-    .\build\Build-All.ps1 -Release
+    .\exokit\Build-All.ps1 -Release
 #>
 
 param(
@@ -29,73 +29,73 @@ $SystemDir = Join-Path $OutputDir "System"
 # Ensure output directories exist
 New-Item -ItemType Directory -Force -Path $OutputDir, $SystemDir | Out-Null
 
-# Force cargo progress display
-$env:CARGO_TERM_PROGRESS_WHEN = "always"
-$env:CARGO_TERM_PROGRESS_WIDTH = "80"
+$BuildType = if ($Release) { "Release" } else { "Debug" }
 
 # Count components
+$ShellDir = Join-Path $RepoRoot "shell"
 $ExtensionsDir = Join-Path $RepoRoot "extensions"
 $Extensions = @()
 if (Test-Path $ExtensionsDir) {
-    $Extensions = Get-ChildItem -Path $ExtensionsDir -Directory
+    $Extensions = Get-ChildItem -Path $ExtensionsDir -Directory |
+    Where-Object { Test-Path (Join-Path $_.FullName "CMakeLists.txt") }
 }
-$TotalSteps = 1 + $Extensions.Count + 1  # Shell + extensions + final step
+
+$HasShell = Test-Path (Join-Path $ShellDir "CMakeLists.txt")
+$TotalSteps = ($HasShell ? 1 : 0) + $Extensions.Count + 1  # Shell + extensions + final step
 
 $CurrentStep = 1
 
-# Build shell
-Write-Host "[$CurrentStep/$TotalSteps] Compiling ExoSuite shell..." -ForegroundColor Cyan
-$cargoArgs = @("build", "-p", "exosuite")
-if ($Release) { $cargoArgs += "--release" }
-
-& cargo @cargoArgs
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Shell build failed!" -ForegroundColor Red
-    exit 1
+# Build shell (if exists)
+if ($HasShell) {
+    Write-Host "[$CurrentStep/$TotalSteps] Compiling ExoSuite shell ($BuildType)..." -ForegroundColor Cyan
+    
+    $BuildDir = Join-Path $ShellDir "build"
+    if (-not (Test-Path $BuildDir)) {
+        New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
+    }
+    
+    Push-Location $BuildDir
+    cmake .. -G Ninja -DCMAKE_BUILD_TYPE=$BuildType -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+    ninja
+    Pop-Location
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Shell build failed!" -ForegroundColor Red
+        exit 1
+    }
+    
+    if ($Release) {
+        $ShellExe = Get-ChildItem -Path $BuildDir -Filter "ExoSuite.exe" | Select-Object -First 1
+        if ($ShellExe) {
+            Copy-Item $ShellExe.FullName -Destination $OutputDir -Force
+        }
+    }
+    $CurrentStep++
 }
-
-# Copy shell to output
-if ($Release) {
-    $ShellExe = Join-Path $RepoRoot "target\release\ExoSuite.exe"
-    Copy-Item $ShellExe -Destination $OutputDir -Force
-}
-$CurrentStep++
 
 # Build extensions
 foreach ($Ext in $Extensions) {
-    Write-Host "[$CurrentStep/$TotalSteps] Compiling $($Ext.Name)..." -ForegroundColor Cyan
+    Write-Host "[$CurrentStep/$TotalSteps] Compiling $($Ext.Name) ($BuildType)..." -ForegroundColor Cyan
     
     $ExtPath = $Ext.FullName
-    $CmakeLists = Join-Path $ExtPath "CMakeLists.txt"
-    $CargoToml = Join-Path $ExtPath "Cargo.toml"
-    
-    if (Test-Path $CargoToml) {
-        # Rust extension
-        $cargoArgs = @("build", "-p", $Ext.Name)
-        if ($Release) { $cargoArgs += "--release" }
-        & cargo @cargoArgs
-        
-        if ($Release) {
-            $ExtExe = Join-Path $RepoRoot "target\release\$($Ext.Name).exe"
-            if (Test-Path $ExtExe) {
-                Copy-Item $ExtExe -Destination $SystemDir -Force
-            }
-        }
+    $BuildDir = Join-Path $ExtPath "build"
+    if (-not (Test-Path $BuildDir)) {
+        New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
     }
-    elseif (Test-Path $CmakeLists) {
-        # C++ extension (CMake)
-        $BuildDir = Join-Path $ExtPath "build"
-        if (-not (Test-Path $BuildDir)) {
-            New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
-        }
-        
-        Push-Location $BuildDir
-        cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
-        ninja
-        Pop-Location
-        
-        # Copy built exe to System folder
-        $BuiltExe = Get-ChildItem -Path $BuildDir -Filter "*.exe" | Select-Object -First 1
+    
+    Push-Location $BuildDir
+    cmake .. -G Ninja -DCMAKE_BUILD_TYPE=$BuildType -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+    ninja
+    Pop-Location
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "$($Ext.Name) build failed!" -ForegroundColor Red
+        exit 1
+    }
+    
+    # Copy built exe to System folder
+    if ($Release) {
+        $BuiltExe = Get-ChildItem -Path $BuildDir -Filter "*.exe" -Exclude "*.dir" | Select-Object -First 1
         if ($BuiltExe) {
             Copy-Item $BuiltExe.FullName -Destination $SystemDir -Force
         }
@@ -106,7 +106,9 @@ foreach ($Ext in $Extensions) {
 
 Write-Host "[$CurrentStep/$TotalSteps] Done! Output: Bin\Release\" -ForegroundColor Green
 Write-Host ""
-Write-Host "  Shell:      Bin\Release\ExoSuite.exe" -ForegroundColor DarkGray
+if ($HasShell) {
+    Write-Host "  Shell:      Bin\Release\ExoSuite.exe" -ForegroundColor DarkGray
+}
 if ($Extensions.Count -gt 0) {
     Write-Host "  Extensions: Bin\Release\System\" -ForegroundColor DarkGray
 }
