@@ -7,6 +7,10 @@
 /exokit/cmake/
 /exokit/ninja/
 
+# Extension build artifacts
+extensions/*/build/
+extensions/*/bin/
+
 # IDE
 .vs/
 *.user

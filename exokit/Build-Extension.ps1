@@ -9,7 +9,7 @@
     Name of the extension (folder name in extensions/).
 
 .EXAMPLE
-    .\build\Build-Extension.ps1 -Name regstudio
+    .\exokit\Build-Extension.ps1 -Name regstudio
 #>
 
 param(
@@ -67,7 +67,7 @@ elseif (Test-Path $CmakeLists) {
     }
     
     Push-Location $BuildDir
-    cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+    cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
     ninja
     Pop-Location
     
@@ -76,8 +76,15 @@ elseif (Test-Path $CmakeLists) {
         exit 1
     }
     
-    # Copy built exe to System folder
-    $BuiltExe = Get-ChildItem -Path $BuildDir -Filter "*.exe" | Select-Object -First 1
+    # Copy built exe to System folder (check both source bin/ and build/ folder)
+    $ExtBinDir = Join-Path $ExtPath "bin"
+    $BuiltExe = $null
+    if (Test-Path $ExtBinDir) {
+        $BuiltExe = Get-ChildItem -Path $ExtBinDir -Filter "*.exe" | Select-Object -First 1
+    }
+    if (-not $BuiltExe) {
+        $BuiltExe = Get-ChildItem -Path $BuildDir -Filter "*.exe" -Exclude "*.dir" | Select-Object -First 1
+    }
     if ($BuiltExe) {
         Copy-Item $BuiltExe.FullName -Destination $SystemDir -Force
     }
