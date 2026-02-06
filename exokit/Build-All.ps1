@@ -29,6 +29,10 @@ $SystemDir = Join-Path $OutputDir "System"
 # Ensure output directories exist
 New-Item -ItemType Directory -Force -Path $OutputDir, $SystemDir | Out-Null
 
+# Force cargo progress display
+$env:CARGO_TERM_PROGRESS_WHEN = "always"
+$env:CARGO_TERM_PROGRESS_WIDTH = "80"
+
 # Count components
 $ExtensionsDir = Join-Path $RepoRoot "extensions"
 $Extensions = @()

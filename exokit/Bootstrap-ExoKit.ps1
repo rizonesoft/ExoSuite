@@ -22,9 +22,9 @@ Write-Host "================" -ForegroundColor Cyan
 
 # Tool versions
 $RustVersion = "stable"
-$LlvmVersion = "20250114"
-$CmakeVersion = "3.31.4"
-$NinjaVersion = "1.12.1"
+$LlvmVersion = "20251216"
+$CmakeVersion = "4.2.3"
+$NinjaVersion = "1.13.1"
 
 # Directories
 $RustDir = Join-Path $ExoKitRoot "rust"

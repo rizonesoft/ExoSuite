@@ -43,6 +43,10 @@ if (-not $CargoPath) {
 
 Write-Host "[1/2] Compiling ExoSuite shell..." -ForegroundColor Cyan
 
+# Force progress display
+$env:CARGO_TERM_PROGRESS_WHEN = "always"
+$env:CARGO_TERM_PROGRESS_WIDTH = "80"
+
 # Run cargo build
 $cargoArgs = @("build", "-p", "exosuite")
 if ($Release) { $cargoArgs += "--release" }
