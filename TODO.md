@@ -25,38 +25,38 @@ This document outlines the complete development roadmap from initial structure t
 
 ### 0.0.1: Development Environment
 - [x] Set up ExoKit portable toolchain (LLVM-MinGW, CMake, Ninja)
-- [ ] Verify LLVM-MinGW: `clang++ --version`
-- [ ] Verify CMake: `cmake --version` (3.25+)
-- [ ] Verify Ninja: `ninja --version`
+- [x] Verify LLVM-MinGW: `clang++ --version` (21.1.8 ✓)
+- [x] Verify CMake: `cmake --version` (4.2.3 ✓)
+- [x] Verify Ninja: `ninja --version` (1.13.1 ✓)
 
 ### 0.0.2: C++ Project Setup
-- [ ] Create root `CMakeLists.txt` for monorepo workspace
-- [ ] Create project directory structure:
+- [x] Create root `CMakeLists.txt` for monorepo workspace
+- [x] Create project directory structure:
   ```
   ExoSuite/
-  ├── shell/
+  ├── src/
   │   ├── CMakeLists.txt
-  │   ├── src/main.cpp
+  │   ├── main.cpp
   │   └── resources/
   ├── extensions/
   ├── shared/exo-ui/
   └── exokit/
   ```
-- [ ] Create minimal `shell/src/main.cpp` (Win32 entry point)
-- [ ] Create `shell/CMakeLists.txt`
-- [ ] Add CMakePresets.json for Debug/Release configurations
+- [x] Create minimal `src/main.cpp` (Win32 entry point)
+- [x] Create `src/CMakeLists.txt`
+- [x] Add CMakePresets.json for Debug/Release configurations
 
 ### 0.0.3: Test Compile & Run
-- [ ] Build: `.\exokit\Build-Shell.ps1 -Release`
-- [ ] Run: `Bin\Release\ExoSuite.exe`
-- [ ] Verify window appears (WS_OVERLAPPEDWINDOW)
+- [x] Build: `.\exokit\Build-ExoSuite.ps1 -Release`
+- [x] Run: `Bin\Release\ExoSuite.exe`
+- [x] Verify window appears (WS_OVERLAPPEDWINDOW)
 
 ### 0.0.4: Basic UI Shell Layout
-- [ ] Add NavigationView/sidebar (owner-draw or custom control)
-- [ ] Add content area (ListView placeholder)
-- [ ] Add toolbar with SVG icon buttons
-- [ ] Add status bar
-- [ ] Verify dark/light theme switching works
+- [x] Add NavigationView/sidebar (owner-draw or custom control)
+- [x] Add content area (ListView placeholder)
+- [x] Add toolbar with SVG icon buttons
+- [x] Add status bar
+- [x] Verify dark/light theme switching works
 
 ---
 
@@ -76,7 +76,7 @@ This document outlines the complete development roadmap from initial structure t
 - [x] Create ExoKit init script (PATH setup)
 - [x] Create Build-All.ps1 (shell + extensions)
 - [x] Create Build-Extension.ps1 (single extension)
-- [x] Create Build-Shell.ps1 (main app)
+- [x] Create Build-ExoSuite.ps1 (main app)
 - [ ] **Target Platform Requirements**:
   - [ ] Set target OS to Windows 10 and Windows 11 only (no Windows 7/8 support)
   - [ ] Configure build for 64-bit (x64) only (no 32-bit support - future standard)
@@ -658,7 +658,7 @@ This document outlines the complete development roadmap from initial structure t
 ```
 Bin/
 └── Release/
-    ├── ExoSuite.exe          ← Main shell (from shell/)
+    ├── ExoSuite.exe          ← Main application (from src/)
     └── System/
         ├── RegStudio.exe     ← Registry Editor (from extensions/regstudio/)
         ├── SysProps.exe      ← System Properties (from extensions/sysprops/)

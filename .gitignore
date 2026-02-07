@@ -12,8 +12,8 @@
 extensions/*/build/
 extensions/*/bin/
 
-# Shell build artifacts
-shell/build/
+# Main app build artifacts
+build/
 
 # IDE
 .vs/

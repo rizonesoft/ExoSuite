@@ -1,0 +1,3 @@
+// ExoSuite application icon
+#define IDI_EXOSUITE 101
+IDI_EXOSUITE ICON "../resources/ExoSuite.ico"
